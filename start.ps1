@@ -1,6 +1,14 @@
 param(
-    [switch]$ForceServerUpdate
+    [switch]$ForceServerUpdate,
+
+    [int]$ServerPort = 5050,
+    [string]$MinRAM = "4G",
+    [string]$MaxRAM = "6G"
 )
+
+if ($env:HYTALE_PORT)    { $ServerPort = [int]$env:HYTALE_PORT }
+if ($env:HYTALE_MIN_RAM) { $MinRAM = $env:HYTALE_MIN_RAM }
+if ($env:HYTALE_MAX_RAM) { $MaxRAM = $env:HYTALE_MAX_RAM }
 
 Write-Host "[0/3] Checking for script updates..." -ForegroundColor Cyan
 
@@ -12,15 +20,21 @@ if ((Get-Command "git" -ErrorAction SilentlyContinue) -and (Test-Path (Join-Path
 
         if ($LocalHash -ne $RemoteHash) {
             Write-Host "      Update found! Pulling changes..." -ForegroundColor Yellow
-            $PullResult = git pull
+            $null = git pull
             Write-Host "      Restarting script with new version..." -ForegroundColor Magenta
             
             $MyArgs = @()
             if ($ForceServerUpdate) { $MyArgs += "-ForceServerUpdate" }
-            
+
+            $MyArgs += "-ServerPort $ServerPort"
+            $MyArgs += "-MinRAM $MinRAM"
+            $MyArgs += "-MaxRAM $MaxRAM"
+
             $PwshExe = (Get-Process -Id $PID).Path
             
-            Start-Process -FilePath $PwshExe -ArgumentList (("-File", "`"$PSCommandPath`"") + $MyArgs) -NoNewWindow -Wait
+            Start-Process -FilePath $PwshExe `
+                -ArgumentList (("-File", "`"$PSCommandPath`"") + $MyArgs) `
+                -NoNewWindow -Wait
             exit
         } else {
             Write-Host "      Scripts are up to date." -ForegroundColor Gray
@@ -45,7 +59,9 @@ if ($PSVersionTable.PSEdition -eq "Core" -and $PSVersionTable.Platform -eq "Unix
 
 Write-Host "[1/3] Checking Downloader Tool..." -ForegroundColor Cyan
 
-if (-not (Test-Path $ToolDir)) { New-Item -Path $ToolDir -ItemType Directory | Out-Null }
+if (-not (Test-Path $ToolDir)) {
+    New-Item -Path $ToolDir -ItemType Directory | Out-Null
+}
 
 $ToolWasUpdated = $false
 
@@ -54,7 +70,9 @@ try {
     $RemoteLastModified = $HeadRequest.Headers["Last-Modified"]
     
     $LocalLastModified = ""
-    if (Test-Path $MetaFile) { $LocalLastModified = Get-Content $MetaFile }
+    if (Test-Path $MetaFile) {
+        $LocalLastModified = Get-Content $MetaFile
+    }
 
     if ($RemoteLastModified -ne $LocalLastModified) {
         Write-Host "      New tool version found. Downloading..." -ForegroundColor Yellow
@@ -80,26 +98,30 @@ $ServerExists = Test-Path $JarCheckPath
 $ShouldUpdate = $ForceServerUpdate -or $ToolWasUpdated -or (-not $ServerExists)
 
 if ($ShouldUpdate) {
-    if ($ForceServerUpdate) { Write-Host "      Forced update requested." -ForegroundColor Yellow }
-    elseif ($ToolWasUpdated) { Write-Host "      Tool updated, syncing server..." -ForegroundColor Yellow }
-    else { Write-Host "      First run/Missing files detected." -ForegroundColor Yellow }
+    if ($ForceServerUpdate) {
+        Write-Host "      Forced update requested." -ForegroundColor Yellow
+    } elseif ($ToolWasUpdated) {
+        Write-Host "      Tool updated, syncing server..." -ForegroundColor Yellow
+    } else {
+        Write-Host "      First run/Missing files detected." -ForegroundColor Yellow
+    }
 
     if ($IsWindows) {
         $ToolExe = Get-ChildItem -Path $ToolDir -Filter "*.exe" -Recurse | Select-Object -First 1
     } else {
         $ToolExe = Get-ChildItem -Path $ToolDir -File | Where-Object { $_.Extension -eq "" } | Select-Object -First 1
-        if ($ToolExe) { Start-Process "chmod" -ArgumentList "+x", $ToolExe.FullName -NoNewWindow -Wait }
+        if ($ToolExe) {
+            Start-Process "chmod" -ArgumentList "+x", $ToolExe.FullName -NoNewWindow -Wait
+        }
     }
 
     if ($ToolExe) {
         Write-Host "      Downloading server files..." -ForegroundColor Gray
         & $ToolExe.FullName -download-path $ServerDir
 
-        $ZipExternal = "$ServerDir.zip"              
-        $ZipInternal = Join-Path $ServerDir "*.zip"  
-        
+        $ZipExternal = "$ServerDir.zip"
         $ZipToExtract = $null
-        
+
         if (Test-Path $ZipExternal) {
             $ZipToExtract = $ZipExternal
         } else {
@@ -108,9 +130,9 @@ if ($ShouldUpdate) {
 
         if ($ZipToExtract) {
             Write-Host "      Unpacking content ($ZipToExtract)..." -ForegroundColor Yellow
-            
-            if (-not (Test-Path $ServerDir)) { New-Item -Path $ServerDir -ItemType Directory | Out-Null }
-            
+            if (-not (Test-Path $ServerDir)) {
+                New-Item -Path $ServerDir -ItemType Directory | Out-Null
+            }
             Expand-Archive -Path $ZipToExtract -DestinationPath $ServerDir -Force
         } else {
             Write-Warning "      No zip file found after download."
@@ -129,9 +151,24 @@ if (Test-Path $ServerDir) {
     
     if (Test-Path $JarPath) {
         Push-Location $ServerDir
-        $JavaArgs = "-jar", ".\Server\HytaleServer.jar", "--assets", "Assets.zip"
-        Write-Host "      Exec: java $JavaArgs" -ForegroundColor Gray
+
+        Write-Host "      RAM: $MinRAM -> $MaxRAM" -ForegroundColor Cyan
+        Write-Host "      Port: $ServerPort" -ForegroundColor Cyan
+
+        $JavaArgs = @(
+            "-Xms$MinRAM"
+            "-Xmx$MaxRAM"
+            "-jar"
+            ".\Server\HytaleServer.jar"
+            "--assets"
+            "Assets.zip"
+            "--bind"
+            $ServerPort
+        )
+
+        Write-Host "      Exec: java $($JavaArgs -join ' ')" -ForegroundColor Gray
         & java $JavaArgs
+
         Pop-Location
     } else {
         Write-Error "HytaleServer.jar not found at $JarPath.`n      Try running update.bat"
