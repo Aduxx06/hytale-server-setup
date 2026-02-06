@@ -1,0 +1,30 @@
+# ┌───────────── minute (0 - 59)
+# │ ┌───────────── hour (0 - 23)
+# │ │ ┌───────────── day of month (1 - 31)
+# │ │ │ ┌───────────── month (1 - 12)
+# │ │ │ │ ┌───────────── day of week (0 - 7) (0 or 7 = Sunday)
+# │ │ │ │ │
+# │ │ │ │ │
+# * * * * *  command to execute
+
+# ===============================================
+# Hytale Server Automatic Backups
+# ===============================================
+# This crontab runs the backup script every day at 03:00 AM.
+# It stops the server, creates a full backup, then restarts the server.
+# Backup logs are saved to backup.log for easy troubleshooting.
+
+# Minute  Hour  Day  Month  Weekday   Command
+0 3 * * * /opt/hytale-server/scripts/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
+
+# ===============================================
+# Optional: Add other maintenance tasks here
+# For example, cleaning old backups:
+# ===============================================
+# Delete backups older than 7 days every day at 04:00 AM
+0 4 * * * find /opt/backups/hytale -type f -name "*.tar.gz" -mtime +7 -exec rm -f {} \; >> /opt/hytale-server/scripts/backup.log 2>&1
+
+# Notes:
+# - Ensure the paths match your server installation
+# - User must have permissions to stop/start the server
+# - Logs help verify backups completed successfully
