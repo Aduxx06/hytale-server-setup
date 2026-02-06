@@ -33,17 +33,93 @@ cd hytale-server-setup
 
 ### 🪟 Windows
 
-1.  **Start Server:** Double-click **`start.bat`**.
-    *   *This will check for tool updates, then launch the server. It will not force-check the game server version to save time.*
-2.  **Force Update:** Double-click **`update.bat`**.
-    *   *Use this if you know a game update is out. It forces a validation of all server files.*
+1. Start Server: Double-click start.bat.
+This will check for tool updates, then launch the server. It will not force-check the game server version to save time.
+
+2. Force Update: Double-click update.bat.
+Use this if you know a game update is out. It forces a validation of all server files.
+
+Optional Parameters:
+Override RAM and port via command line:
+.\start.ps1 -ServerPort 7777 -MinRAM 4G -MaxRAM 8G
 
 ### 🐧 Linux
 
 First, ensure the scripts are executable:
 ```bash
-chmod +x start.sh update.sh
+chmod +x start.sh update.sh scripts/backup.sh
 ```
 
 1.  **Start Server:** Run `./start.sh`
 2.  **Force Update:** Run `./update.sh`
+3.  **Optional Parameters:
+Override RAM and port: pwsh ./start.ps1 -ServerPort 7777 -MinRAM 4G -MaxRAM 8G
+
+Configuration (RAM & Port)
+
+Default values:
+
+Port: 5050
+
+RAM: 2G → 4G
+
+Using environment variables (recommended for systemd)
+
+Environment=HYTALE_PORT=5520
+Environment=HYTALE_MIN_RAM=4G
+Environment=HYTALE_MAX_RAM=8G
+
+Systemd Service (Linux)
+
+Copy the service file:
+
+sudo cp systemd/hytale.service /etc/systemd/system/hytale.service
+sudo systemctl daemon-reload
+sudo systemctl enable hytale
+sudo systemctl start hytale
+
+
+Attach to console:
+
+screen -r hytale
+
+Backups
+Manual backup
+chmod +x scripts/backup.sh
+sudo scripts/backup.sh
+
+Automatic backup (cron example)
+0 3 * * * /opt/hytale-server/scripts/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
+
+Optional: systemd timer
+sudo cp systemd/hytale-backup.service /etc/systemd/system/
+sudo cp systemd/hytale-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now hytale-backup.timer
+
+Repository Structure
+.
+├── start.ps1
+├── start.sh
+├── update.sh
+├── start.bat
+├── update.bat
+├── scripts/
+│   └── backup.sh
+├── systemd/
+│   ├── hytale.service
+│   ├── hytale-backup.service
+│   └── hytale-backup.timer
+├── crontab.txt
+├── README.md
+└── .gitignore
+
+Notes
+
+Make sure the paths in systemd/crontab match your installation.
+
+Windows users can rely on .bat wrappers.
+
+Linux users can use .sh wrappers, systemd, or cron for automation.
+
+Always check logs (backup.log or console output) to verify backup/update success.
