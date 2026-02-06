@@ -1,0 +1,21 @@
+[Unit]
+Description=Hytale Dedicated Server
+After=network.target
+
+[Service]
+User=hytale
+WorkingDirectory=/opt/hytale-server
+Type=forking
+
+Environment=HYTALE_PORT=5050
+Environment=HYTALE_MIN_RAM=4G
+Environment=HYTALE_MAX_RAM=6G
+
+ExecStart=/usr/bin/screen -dmS hytale /opt/hytale-server/start.sh
+ExecStop=/usr/bin/screen -S hytale -X quit
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
