@@ -23,7 +23,7 @@ Before running the scripts, ensure you have the following installed:
    **a terminal multiplexer that allows you to run your server in a "virtual window". This ensures the process keeps running in the background even if you close your terminal or lose your SSH connection.
    
    Installation:
-   Debian/Ubuntu: sudo apt install screen
+   **Debian/Ubuntu: sudo apt install screen
    CentOS/RHEL: sudo yum install screen**
 
 ## Installation
