@@ -19,13 +19,18 @@ Before running the scripts, ensure you have the following installed:
 3.  **PowerShell:**
     *   **Windows:** Installed by default.
     *   **Linux:** You must install PowerShell (`pwsh`). [Installation Guide](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux)
+4. **Screen **
+   **A terminal multiplexer that allows you to run your server in a "virtual window". This ensures the process keeps running in the background even if you close your terminal or lose your SSH connection.
+   Installation:
+   Debian/Ubuntu: sudo apt install screen
+   CentOS/RHEL: sudo yum install screen**
 
 ## Installation
 
 Do not download this as a ZIP. **You must clone the repository** for the auto-update feature to work.
 
 ```bash
-git clone https://github.com/intisy/hytale-server-setup.git
+git clone https://github.com/Aduxx06/hytale-server-setup.git
 cd hytale-server-setup
 ```
 
@@ -47,7 +52,7 @@ Override RAM and port via command line:
 
 First, ensure the scripts are executable:
 ```bash
-chmod +x start.sh update.sh scripts/backup.sh
+chmod +x start.sh update.sh backup.sh
 ```
 
 1.  **Start Server:** Run `./start.sh`
@@ -85,34 +90,11 @@ screen -r hytale
 
 Backups
 Manual backup
-chmod +x scripts/backup.sh
-sudo scripts/backup.sh
+chmod +x backup.sh
+sudo backup.sh
 
 Automatic backup (cron example)
 0 3 * * * /opt/hytale-server/scripts/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
-
-Optional: systemd timer
-sudo cp systemd/hytale-backup.service /etc/systemd/system/
-sudo cp systemd/hytale-backup.timer /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now hytale-backup.timer
-
-Repository Structure
-.
-├── start.ps1
-├── start.sh
-├── update.sh
-├── start.bat
-├── update.bat
-├── scripts/
-│   └── backup.sh
-├── systemd/
-│   ├── hytale.service
-│   ├── hytale-backup.service
-│   └── hytale-backup.timer
-├── crontab.txt
-├── README.md
-└── .gitignore
 
 Notes
 
