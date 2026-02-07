@@ -19,8 +19,8 @@ Before running the scripts, ensure you have the following installed:
 3.  **PowerShell:**
     *   **Windows:** Installed by default.
     *   **Linux:** You must install PowerShell (`pwsh`). [Installation Guide](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux)
-4. **Screen **
-   **A terminal multiplexer that allows you to run your server in a "virtual window". This ensures the process keeps running in the background even if you close your terminal or lose your SSH connection.
+4. **Screen:**
+   **a terminal multiplexer that allows you to run your server in a "virtual window". This ensures the process keeps running in the background even if you close your terminal or lose your SSH connection.
    Installation:
    Debian/Ubuntu: sudo apt install screen
    CentOS/RHEL: sudo yum install screen**
