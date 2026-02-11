@@ -15,7 +15,7 @@
 # Backup logs are saved to backup.log for easy troubleshooting.
 
 # Minute  Hour  Day  Month  Weekday   Command
-0 3 * * * /opt/hytale-server/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
+0 3 * * * /opt/hytale-server/backup.sh >> /opt/hytale-server/backup.log 2>&1
 
 # ===============================================
 # Optional: Add other maintenance tasks here
