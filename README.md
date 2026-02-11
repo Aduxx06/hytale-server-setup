@@ -95,7 +95,7 @@ chmod +x backup.sh
 sudo backup.sh
 
 Automatic backup (cron example)
-0 3 * * * /opt/hytale-server/scripts/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
+0 3 * * * /opt/hytale-server/backup.sh >> /opt/hytale-server/backup.log 2>&1
 
 Notes
 
