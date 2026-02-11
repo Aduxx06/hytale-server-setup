@@ -15,14 +15,14 @@
 # Backup logs are saved to backup.log for easy troubleshooting.
 
 # Minute  Hour  Day  Month  Weekday   Command
-0 3 * * * /opt/hytale-server/scripts/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
+0 3 * * * /opt/hytale-server/backup.sh >> /opt/hytale-server/scripts/backup.log 2>&1
 
 # ===============================================
 # Optional: Add other maintenance tasks here
 # For example, cleaning old backups:
 # ===============================================
 # Delete backups older than 7 days every day at 04:00 AM
-0 4 * * * find /opt/backups/hytale -type f -name "*.tar.gz" -mtime +7 -exec rm -f {} \; >> /opt/hytale-server/scripts/backup.log 2>&1
+0 4 * * * find /opt/hytale -type f -name "*.tar.gz" -mtime +7 -exec rm -f {} \; >> /opt/hytale-server/backup.log 2>&1
 
 # Notes:
 # - Ensure the paths match your server installation
